@@ -1,15 +1,14 @@
-# ビルド用
+# 1. ビルド環境（新しいGradle用イメージ）
 FROM gradle:7.6-jdk17 AS build
 WORKDIR /app
 COPY . .
-RUN gradle build -x test
+# Gradleのラッパーに実行権限を与えてビルド
+RUN chmod +x gradlew && ./gradlew build -x test
 
-# 実行環境
+# 2. 実行環境（削除されたopenjdkの代わり）
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
+# ビルドしたjarファイルをコピー
 COPY --from=build /app/build/libs/*.jar app.jar
-
-# ここを 8081 に変更
 EXPOSE 8081
-
 ENTRYPOINT ["java","-jar","app.jar"]

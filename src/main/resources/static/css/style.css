@@ -1,0 +1,545 @@
+body { margin: 0; font-family: sans-serif; background: #1a1a1a; color: #eee; height: 100vh; display: flex; flex-direction: column; }
+
+.top-ui { height: 50px; background: #333; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid #555; }
+
+/* タイトル画面全体：プレゼンスライド風 */
+#title-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 中央に寄せる */
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 1s ease;
+    border: 20px solid #111; /* 外枠をつけてスライド感を出す */
+    box-sizing: border-box;
+}
+
+/* メインタイトル：プレゼンの題名 */
+.title-logo {
+    text-align: center;
+    border-bottom: 2px solid #fff; /* タイトルの下にアクセントライン */
+    padding-bottom: 20px;
+    margin-bottom: 10px;
+    width: 60%;
+}
+
+.title-logo h1 {
+    font-size: 5rem;
+    color: #fff;
+    margin: 0;
+    letter-spacing: 0.1em;
+    font-family: 'Times New Roman', serif; /* 少し硬めのフォント */
+}
+
+/* サブタイトル：プレゼンの副題 */
+.subtitle {
+    color: #aaa;
+    font-size: 1.2rem;
+    letter-spacing: 0.5em;
+    margin-top: 15px;
+    margin-bottom: 100px; /* メニューとの距離 */
+}
+
+/* メニューエリア：スライド下部の操作ボタン */
+.title-menu {
+    display: flex;
+    flex-direction: row; /* 横並びに変更 */
+    gap: 40px;
+}
+
+.menu-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    padding: 10px 20px;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+/* パワーポイントの選択中のような下線演出 */
+.menu-btn::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #fff;
+    transition: all 0.3s;
+    transform: translateX(-50%);
+}
+
+.menu-btn:hover {
+    color: #fff;
+}
+
+.menu-btn:hover::after {
+    width: 100%;
+}
+
+
+/* デフォルトの背景（黒）を維持しつつ、内側に光を滲ませる */
+.game-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    transition: box-shadow 0.8s ease; /* 切り替えを滑らかに */
+}
+
+/* 光の民：画面の縁が白く淡く発光する */
+.light-mode .game-container {
+    box-shadow: inset 0 0 100px rgba(255, 255, 255, 0.15);
+}
+
+/* 闇の民：画面の縁が赤黒く、または深く淀んだ紫色に沈む */
+.dark-mode .game-container {
+    box-shadow: inset 0 0 100px rgba(70, 0, 150, 0.2); 
+}
+
+/* UIパーツの色も連動させる */
+.light-mode .top-ui { border-bottom: 2px solid #fff; }
+.dark-mode .top-ui { border-bottom: 2px solid #4a0096; }
+
+
+/* 0章：最初はオーラ（背景色）がない状態にする */
+body:not(.light-mode):not(.dark-mode):not(.rosetta-mode) .game-container {
+    box-shadow: none;
+    background: #000;
+}
+
+/* 属性ラベルも最初は「？」や「未定」に見えるように */
+#player-attr {
+    background: transparent;
+    color: #444;
+}
+
+/* 光の民（初期状態）: 白背景に黒文字 */
+.light-mode #player-attr {
+    background-color: #ffffff;
+    color: #000000 !important;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* 闇の民：紫背景に白文字 */
+.dark-mode #player-attr {
+    background-color: #800080;
+    color: #ffffff !important;
+}
+/* ロゼッタモード：背景なし（または薄いグレー）にグレー文字 */
+.rosetta-mode #player-attr {
+    background-color: transparent;
+    color: #888888 !important;
+}
+
+.side-panel { width: 200px; background: #252525; padding: 15px; border: 1px solid #444; }
+
+/* メインディスプレイの設定変更 */
+.main-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    overflow: hidden; /* ここでスクロールを止める */
+    position: relative;
+}
+
+#cipher-canvas { border: 1px solid #333; background: #000; }
+
+#memo-area {
+    width: 100%;           /* 親要素の幅いっぱいに広げる */
+    box-sizing: border-box; /* パディングとボーダーを幅に含める（これで右端が切れません） */
+    height: 80%;
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 10px;         /* 内側の余白 */
+    resize: none;          /* ユーザーによるサイズ変更を禁止（レイアウト崩れ防止） */
+    font-family: inherit;  /* フォントを統一 */
+    outline: none;         /* クリック時の青い枠線を消す */
+}
+
+.left-panel ul { list-style: none; padding: 0; }
+.left-panel li { padding: 10px; cursor: pointer; border-bottom: 1px solid #333; }
+.left-panel li:hover { background: #444; }
+/* 右パネル自体の余白も調整 */
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px; /* ここが狭すぎると窮屈に見えるので調整 */
+}
+.right-panel button {
+    width: 100%;
+    padding: 10px;
+    background: #444;
+    color: white;
+    border: 1px solid #666;
+    cursor: pointer;
+}
+.right-panel button:hover {
+    background: #555;
+}
+
+/* ロゼッタモード：中央集中的な深いグレーの影 */
+.rosetta-mode .game-container {
+    box-shadow: inset 0 0 150px rgba(150, 150, 150, 0.1);
+}
+
+#story-container {
+    width: 100%;       /* 横幅いっぱいに広げる */
+    max-width: none;   /* 制限を解除して右端まで到達させる */
+    height: 100vh;     /* 高さいっぱい */
+    overflow-y: scroll; /* 常にスクロールバーを表示（ガタつき防止） */
+    padding: 40px 10% 100px 10%; /* 左右に余白(10%)を作って、文字は中央寄りに */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* スクロールバー自体のデザイン（メモ欄の横に馴染むように） */
+#story-container::-webkit-scrollbar {
+    width: 8px;
+}
+#story-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+#story-container::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
+#story-container::-webkit-scrollbar-thumb:hover {
+    background: #444;
+}
+
+/* 地の文に埋め込まれた言葉の装飾 */
+.highlight-word {
+    color: #fff;
+    font-weight: bold;
+    border-bottom: 1px solid #555;
+    padding: 0 4px;
+    margin: 0 2px;
+}
+
+/* 改行（brタグ）の間隔を調整 */
+.story-text br {
+    content: "";
+    display: block;
+    margin-bottom: 0.8em;
+}
+
+.story-text {
+    width: 100%;
+    font-size: 1.0rem;      /* 1.1remから少し縮小 */
+    color: #ccc;           /* 少し落ち着いた色に */
+    margin: 20px 0;
+    white-space: pre-wrap;
+    text-align: center;
+    line-height: 1.8;      /* 2.5から1.8へ（約半分程度の間隔に） */
+    letter-spacing: 0.1em; /* 文字の間隔を広げて高級感を出す */
+}
+
+/* 最後の文の下にさらに「余白」を確保 */
+#story-epilogue {
+    margin-bottom: 20px;
+}
+
+/* ゲームボードの設定変更 */
+#game-board {
+    display: flex;
+    flex-direction: column; /* 縦並びに変更 */
+    align-items: center;    /* 中央揃え */
+    gap: 60px;              /* ドット絵同士の縦の間隔 */
+    padding: 40px 0;
+    width: 100%;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+/* 各単語の幅を少し小さくして収まりやすくする */
+.word-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;            /* 親の幅に合わせる */
+    max-width: 400px;       /* テキストが広がりすぎないよう制限 */
+}
+
+/* ドット絵の上のテキスト */
+.main-title {
+    min-height: 1.5em; /* 1行分の高さを確保 */
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* ドット絵との間に0.5行分の隙間を作る */
+    margin-bottom: 12px; 
+    line-height: 1.4;
+}
+
+.sub-text {
+    min-height: 1.5em; /* 常に1行分の高さを確保 */
+    font-size: 0.85rem;
+    color: #555;       /* 暗いグレー */
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    margin-bottom: 24px;
+    
+    /* 初期状態は透明にしておく（場所は取ったままにする） */
+    visibility: hidden; 
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* ヒントがONの時の表示設定 */
+.sub-text.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* ついでにドット絵自体のスタイルも微調整 */
+.cipher-canvas {
+    background: #000;
+    border: 1px solid #333;
+    display: block; /* 余計な隙間を排除 */
+}
+
+
+.decode-input {
+    width: 100px;
+    height: 35px;
+    text-align: center;
+    font-size: 1.1rem;
+    background: #000;      /* 背景を完全な黒に */
+    color: #fff;           /* 文字は白 */
+    border: 1px solid #444; /* 控えめな枠線 */
+    border-radius: 4px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.decode-input.correct {
+    border-color: #00ff00;
+    background: #002200;   /* 正解時は少し深緑に */
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+.decode-input:focus {
+    border-color: #888;
+}
+
+.balance-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: center;
+    max-width: 400px;
+}
+
+.balance-bar {
+    width: 200px;
+    height: 10px;
+    background: #444; /* 背景（均衡） */
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #666;
+}
+
+#balance-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%; /* 初期位置：中央 */
+    width: 20px;
+    height: 100%;
+    background: #fff;
+    box-shadow: 0 0 10px #fff;
+    transition: all 0.5s ease-in-out;
+    transform: translateX(-50%);
+}
+
+/* 偏向時のラベル装飾 */
+.label { font-size: 0.8rem; color: #888; }
+
+/* リストが逆転する時の演出（一瞬ノイズのように揺れる） */
+#stage-list {
+    transition: all 0.5s ease;
+}
+
+#stage-list.list-reversing {
+    filter: blur(5px) invert(1); /* ぼかしと色反転で「異常事態」を演出 */
+    opacity: 0.5;
+    transform: scaleX(-1); /* 左右反転させて鏡合わせの世界を表現 */
+}
+
+/* ロックされたステージ：暗くし、クリックを無効化 */
+#stage-list li.locked {
+    opacity: 0.2;
+    pointer-events: none; /* マウスイベントを完全に遮断 */
+    cursor: default;
+    user-select: none;    /* テキスト選択も不可 */
+}
+
+/* ロックされていないステージ（通常時） */
+#stage-list li:not(.locked) {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 鍵がかかっていることを示すアイコン（任意） */
+#stage-list li.locked::before {
+    content: "🔒 ";
+    font-size: 0.8rem;
+}
+
+#stage-list li.locked:hover {
+    background: transparent;
+}
+
+/* ロゼッタモード時のリスト項目の色 */
+.rosetta-mode .side-panel {
+    border-right: 2px solid #888;
+    background: #111;
+}
+
+.rosetta-mode #stage-list li {
+    color: #888;
+    border-bottom: 1px solid #444;
+}
+
+.rosetta-mode #stage-list li:hover {
+    color: #fff;
+    background: #222;
+}
+
+/* ロック中のボタン：背景に馴染ませる */
+#rosetta-btn:disabled {
+    color: #444;
+    border-color: #222;
+    background: transparent;
+    cursor: default;
+}
+
+/* 解放された瞬間の発光アニメーション */
+.unlocked-flash {
+    animation: rosetta-glow 2s infinite alternate;
+    border: 1px solid #fff !important;
+    color: #000 !important;
+    text-shadow: 0 0 10px #fff;
+    cursor: pointer;
+}
+
+@keyframes rosetta-glow {
+    from { box-shadow: 0 0 5px rgba(255,255,255,0.2); }
+    to { box-shadow: 0 0 20px rgba(255,255,255,0.6); }
+}
+
+
+
+/* ステージリストの基本スタイルを調整 */
+#stage-list li {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+    transition: all 0.3s ease;
+    color: #888; /* 通常時は少し暗く */
+}
+
+/* 選択されているステージのスタイル */
+#stage-list li.active {
+    background: #444;      /* 明るめのグレー */
+    color: #fff;           /* 文字を白く */
+    border-left: 4px solid #fff; /* 左端に強調ライン */
+    font-weight: bold;
+}
+
+/* タイトルも中央揃えを強調 */
+.stage-title-display {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 30px;
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+
+/* 「次へ進む」ボタン：物語に馴染むように */
+#next-stage-btn {
+    display: block;
+    margin: 40px auto;
+    padding: 15px 40px;
+    background: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    transition: all 0.5s ease;
+}
+
+#next-stage-btn:hover {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* 入力中、文字が入っている場合は枠を少し明るくする */
+.decode-input:not(:placeholder-shown) {
+    border-color: #888;
+}
+
+#faction-selector {
+    position: relative;
+    z-index: 100;      /* クリックを最優先に */
+    display: none;     /* JSで制御 */
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 40px 0;
+    margin-bottom: 20px;
+    border-top: 1px solid #222;
+    border-bottom: 1px solid #222;
+}
+
+#faction-selector p {
+    color: #888;
+    letter-spacing: 0.1em;
+    font-size: 0.9rem;
+}
+
+.select-btn {
+    background: #000;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 12px 40px;
+    cursor: pointer;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    transition: all 0.5s ease;
+}
+
+.select-btn:hover {
+    border-color: #fff;
+    background: #111;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}

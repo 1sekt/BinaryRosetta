@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>BinaryRosetta - 異言語解読</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="light-mode"> <!-- 初期属性クラスを付与 -->
+
+    <!-- 1. タイトル画面 -->
+	<div id="title-screen">
+	    <div class="title-logo">
+	        <h1>BinaryRosetta</h1>
+	    </div>
+	    <p class="subtitle">DEVELOPMENT OF BINARY INTERPRETATION</p>
+	    
+	    <nav class="title-menu">
+	        <button onclick="startGame()" class="menu-btn">Unravel</button>
+	        <button onclick="alert('Option Menu')" class="menu-btn">Option</button>
+	        <button onclick="alert('Log View')" class="menu-btn">Log</button>
+	    </nav>
+	</div>
+
+    <!-- 2. ゲーム本編（最初は非表示） -->
+    <div id="game-content" style="display: none; flex-direction: column; height: 100vh;">
+        <header class="top-ui">
+            <div class="status">属性: <span id="player-attr">光の民</span></div>
+            <div class="balance-container">
+                <span class="label">闇</span>
+                <div class="balance-bar">
+                    <div id="balance-indicator"></div>
+                </div>
+                <span class="label">光</span>
+            </div>
+            <div class="controls">
+                <button id="rosetta-btn" onclick="toggleRosetta()" disabled>ー</button>
+                <button onclick="switchFaction()">属性反転</button>
+                <button id="hint-btn" onclick="toggleHints()">ヒント：OFF</button>
+                <button onclick="alert('Settings: Default')">設定</button>
+            </div>
+        </header>
+
+        <main class="game-container">
+            <!-- 左: ステージ選択 -->
+            <nav class="side-panel left-panel">
+                <h3>ステージ一覧</h3>
+                <ul id="stage-list">
+                    <li onclick="loadStage(0)">Chapter_00.json</li>
+                    <li onclick="loadStage(1)">Chapter_01.json</li>
+                    <li onclick="loadStage(2)">Chapter_02.json</li>
+                    <li onclick="loadStage(3)">Chapter_03.json</li>
+                    <li onclick="loadStage(4)">Chapter_04.json</li>
+                    <li onclick="loadStage(5)">Chapter_05.json</li>
+                    <li onclick="loadStage(6)">Chapter_06.json</li>
+                    <li onclick="loadStage(7)">Chapter_07.json</li>
+                    <li onclick="loadStage(8)">Chapter_08.json</li>
+                    <li onclick="loadStage(9)">Chapter_09.json</li>
+                    <li onclick="loadStage(10)">Chapter_10.json</li>
+                </ul>
+            </nav>
+
+            <!-- 中央: メインの物語表示 -->
+            <section class="main-display">
+                <div id="story-container">
+                    <h2 id="current-chapter-title" class="stage-title-display"></h2>
+                    <div id="story-prologue" class="story-text"></div>
+                    <div id="game-board"></div>
+                    <div id="story-epilogue" class="story-text"></div>
+                </div>
+            </section>
+
+            <!-- 右: メモ欄 -->
+            <aside class="side-panel right-panel">
+                <h3>解読メモ</h3>
+                <textarea id="memo-area" placeholder="ここに推測をメモ..."></textarea>
+                <button onclick="saveMemo()">メモを保存</button>
+            </aside>
+        </main>
+    </div>
+
+    <script th:src="@{/js/game.js}"></script>
+</body>
+</html>

@@ -4,10 +4,12 @@ WORKDIR /app
 COPY . .
 RUN gradle build -x test
 
-# 実行用
-FROM openjdk:17-jdk-slim
+# 実行環境
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
-# ビルドしたjarをコピー（ plain.jar を除外するため * を工夫しています）
-COPY --from=build /app/build/libs/*-SNAPSHOT.jar app.jar
-EXPOSE 8080
+COPY --from=build /app/build/libs/*.jar app.jar
+
+# ここを 8081 に変更
+EXPOSE 8081
+
 ENTRYPOINT ["java","-jar","app.jar"]

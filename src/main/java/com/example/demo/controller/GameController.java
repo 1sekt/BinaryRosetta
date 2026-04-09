@@ -30,6 +30,12 @@ public class GameController {
     // 最大到達ステージ (初期値は0)
     private int maxReachedStage = 0;
 
+    @GetMapping("/")
+    public String index() {
+        return "index"; // これで templates/index.html が表示されます
+    }
+
+    
     @PostMapping("/api/stage/submit/{id}")
     @ResponseBody 
     public String submitStage(@PathVariable int id, @RequestBody Map<String, String> answers) {
